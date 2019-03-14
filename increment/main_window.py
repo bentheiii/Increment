@@ -12,7 +12,7 @@ from PySide2.QtCore import Qt, QSettings
 
 
 class MainWindow(QWidget):
-    def make_calc_radio_button(self, *args, calc_function, calc_target, **kwargs):
+    def make_calc_radio_button(self, *args, calc_function, calc_target, shortcut, **kwargs):
         ret = QRadioButton(*args, **kwargs)
         ret.setFocusPolicy(Qt.ClickFocus)
 
@@ -22,6 +22,13 @@ class MainWindow(QWidget):
                 self.calc_function = calc_function
                 self.calc_target = calc_target
                 self.target_changed()
+
+        @ret.clicked.connect
+        def on_click(c):
+            ret.setFocusPolicy(Qt.ClickFocus)
+
+        if shortcut:
+            ret.setShortcut(shortcut)
 
         return ret
 
@@ -62,6 +69,10 @@ class MainWindow(QWidget):
         self.after_edit: QLineEdit = None
         self.change_edit: QLineEdit = None
 
+        self.calc_before_radio: QRadioButton = None
+        self.calc_after_radio: QRadioButton = None
+        self.calc_change_radio: QRadioButton = None
+
         self.calc_function: Callable[[str, str, str], Tuple[str, Optional[str]]] = None
         self.calc_target: QLineEdit = None
 
@@ -85,21 +96,21 @@ class MainWindow(QWidget):
         self.after_edit = self.make_edit(placeholder='after', font_size=font_size)
         self.change_edit = self.make_change_edit(placeholder='change', font_size=font_size)
 
-        calc_before_radio = self.make_calc_radio_button(calc_function=calc_before,
-                                                        calc_target=self.before_edit)
-        calc_after_radio = self.make_calc_radio_button(calc_function=calc_after,
-                                                       calc_target=self.after_edit)
-        calc_change_radio = self.make_calc_radio_button(calc_function=calc_change,
-                                                        calc_target=self.change_edit)
+        self.calc_before_radio = self.make_calc_radio_button(shortcut='ALT+b', calc_function=calc_before,
+                                                             calc_target=self.before_edit)
+        self.calc_after_radio = self.make_calc_radio_button(shortcut='ALT+a', calc_function=calc_after,
+                                                            calc_target=self.after_edit)
+        self.calc_change_radio = self.make_calc_radio_button(shortcut='ALT+c', calc_function=calc_change,
+                                                             calc_target=self.change_edit)
 
         main_layout.addWidget(self.before_edit, 1, 0)
-        main_layout.addWidget(calc_before_radio, 1, 1)
+        main_layout.addWidget(self.calc_before_radio, 1, 1)
 
         main_layout.addWidget(self.after_edit, 3, 0)
-        main_layout.addWidget(calc_after_radio, 3, 1)
+        main_layout.addWidget(self.calc_after_radio, 3, 1)
 
         main_layout.addWidget(self.change_edit, 5, 0)
-        main_layout.addWidget(calc_change_radio, 5, 1)
+        main_layout.addWidget(self.calc_change_radio, 5, 1)
 
         self.setLayout(main_layout)
 
@@ -116,7 +127,7 @@ class MainWindow(QWidget):
 
         main_layout.addWidget(about_btn, 0, 1)
 
-        calc_change_radio.setChecked(True)
+        self.calc_change_radio.setChecked(True)
 
     def target_changed(self):
         for edit in (self.before_edit,
@@ -137,7 +148,7 @@ class MainWindow(QWidget):
     def recalculate(self):
         b = self.before_edit.text()
         a = self.after_edit.text()
-        c = self.change_edit.text()+'%'
+        c = self.change_edit.text() + '%'
 
         try:
             result, stylesheet = self.calc_function(b, a, c)

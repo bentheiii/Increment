@@ -14,9 +14,11 @@ class PercentLineEdit(QLineEdit):
         layout = QTextLayout('%', self.font())
 
         painter = QPainter(self)
-        pos = (painter.boundingRect(self.rect(), Qt.AlignVCenter, text).topRight()
-               + painter.boundingRect(self.rect(), Qt.AlignVCenter, text + '%').topRight()) \
-              / 2
+
+        cr = self.cursorRect()
+
+        pos = painter.boundingRect(self.rect(), Qt.AlignVCenter, text).topRight() + QPoint(cr.width() // 2,
+                                                                                           cr.top() // 4)
 
         layout.beginLayout()
         line = layout.createLine()
@@ -26,3 +28,12 @@ class PercentLineEdit(QLineEdit):
 
         painter.setPen(QPen(Qt.gray, 1))
         layout.draw(painter, QPoint(0, 0))
+
+
+if __name__ == '__main__':
+    from PySide2.QtWidgets import QApplication
+
+    app = QApplication([])
+    w = PercentLineEdit()
+    w.show()
+    app.exec_()
