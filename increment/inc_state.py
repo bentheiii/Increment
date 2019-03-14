@@ -28,7 +28,7 @@ def calc_after(before, after, change):
 
 
 def change_format(n):
-    ret = format(n, '+,.2%')
+    ret = format(n*100, '+,.2f')
     stylesheet = ''
     if n < 0:
         stylesheet = 'color: red;'
