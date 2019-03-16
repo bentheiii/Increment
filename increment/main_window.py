@@ -114,7 +114,7 @@ class MainWindow(QWidget):
 
         self.setLayout(main_layout)
 
-        about_btn = QPushButton('about...')
+        about_btn = QPushButton('ab&out...')
         about_btn.setFocusPolicy(Qt.ClickFocus)
 
         @about_btn.clicked.connect
